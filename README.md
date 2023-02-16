@@ -7,6 +7,6 @@ This project also acts as an unofficial documentation of the TermUI library. It 
 
 It is lightly commented and any developer worth their salt will be able to understand and use the library if they'd please.
 
-
+D-Word only has 2 dependencies `curses` or `windows-curses`, and `cryptography`
 
 ![enter image description here](https://cdn.upload.systems/uploads/7GqMS8rw.png)![enter image description here](https://cdn.upload.systems/uploads/mQ9tvv0c.png)
