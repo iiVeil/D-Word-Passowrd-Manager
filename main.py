@@ -8,9 +8,12 @@ from TermUI.region import Region
 from TermUI.button import Button
 from TermUI.textbox import Textbox
 from TermUI.position import Position
+from TermUI.Toolkit.asciiart import AsciiArt
+from TermUI.Toolkit.hover import Hover
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 
 
 def main(stdscr):
@@ -190,7 +193,7 @@ def main(stdscr):
             loginRegion.add_element(left_line)
         loginScreen.draw()
         aliens_spawned = True
-
+        
     def toggle_loginViewer_data(button):
         # TOGGLE PASSWORD TEXT IN THE LOGIN VIEWER
         if not button.clicked:
@@ -255,22 +258,39 @@ def main(stdscr):
             button.data["element"].password = False
         button.region.ui.draw()
 
+    def on_hover_button(element):
+        element.color = 47
+        element.region.ui.draw()
+
+    def off_hover_button(element):
+        element.color = element.region.color
+        element.region.ui.draw()
+
+    def on_hover_title(_):
+        for item in ascii.elements:
+            item.color = 47
+        element.region.ui.draw()
+    
+    def off_hover_title(_):
+        for item in ascii.elements:
+            item.color = item.region.color
+        element.region.ui.draw()
+
+    hover = Hover()
+        
     aliens_spawned = False
 
     # LOGIN SCREEN
-    title = " ______                   _______  _______  ______  \n(  __  \        |\     /|(  ___  )(  ____ )(  __  \ \n| (  \  )       | )   ( || (   ) || (    )|| (  \  )\n| |   ) | _____ | | _ | || |   | || (____)|| |   ) |\n| |   | |(_____)| |( )| || |   | ||     __)| |   | |\n| |   ) |       | || || || |   | || (\ (   | |   ) |\n| (__/  )       | () () || (___) || ) \ \__| (__/  )\n(______/        (_______)(_______)|_/  \___(_______/"
+    title = " ______                   _______  _______  ______  \n(  __  \        |\     /|(  ___  )(  ____ )(  __  \ \n| (  \  )       | )   ( || (   ) || (    )|| (  \  )\n| |   ) | _____ | | _ | || |   | || (____)|| |   ) |\n| |   | |(_____)| |( )| || |   | ||     __)| |   | |\n| |   ) |       | || || || |   | || (\ (   | |   ) |\n| (__/  )       | () () || (___) || ) \ \__| (__/  )\n(______/        (_______)(_______)|_/  \___(_______/".split("\n")
     loginScreen = UI(stdscr)
-    loginRegion = Region("Login", Position(0, 0), Position(119, 29))
+    loginRegion = Region("Login", Position(0, 0), Position.DEFAULT_TERM_SIZE())
     loginRegion.framed = False
 
-    # TITLE ASCII ART
-    TITLE_LINES = title.split("\n")
-    for i, line in enumerate(TITLE_LINES):
-        position = Position(loginRegion.size.half().x-len(line)+23,
-                            loginRegion.size.half().y-len(TITLE_LINES)+i)
-        text_element = Text(line, position)
-        text_element.callback = spawn_aliens
-        loginRegion.add_element(text_element)
+    ascii = AsciiArt(title, loginRegion, loginRegion.size.half())
+    ascii.create()
+    for element in ascii.elements:
+        hover.add(element, on_hover_title, off_hover_title)
+        element.callback = spawn_aliens
 
     # SUBTITLE
     subtitle_string = "The safety first offline password manager."
@@ -296,8 +316,8 @@ def main(stdscr):
     loginRegion.add_element(masterPassword)
 
     # LOGIN BUTTON
-    loginButton = Button("Login", masterPassword.pack.get(
-        "right") + Position(1, 0), on_login)
+    loginButton = Button("Login", masterPassword.pack.get("right") + Position(1, 0), on_login)
+    hover.add(loginButton, on_hover_button, off_hover_button)
     loginRegion.add_element(loginButton)
 
     # ADD REGION
@@ -307,9 +327,10 @@ def main(stdscr):
     mainScreen = UI(stdscr)
 
     # MAIN REGION
-    mainRegion = Region("", Position(0, 0), Position(119, 29))
+    mainRegion = Region("", Position(0, 0), Position.DEFAULT_TERM_SIZE())
     changeMasterPassword = Button(
         "Change Master Password", Position(1, 0), change_master_password)
+    hover.add(changeMasterPassword, on_hover_button, off_hover_button)
     mainRegion.add_element(changeMasterPassword)
 
     # LOGIN LIST
@@ -326,16 +347,12 @@ def main(stdscr):
         "Create new login", loginViewer.pack.get("down") + Position(0, 9), Position(mainRegion.size.half().x, 10))
 
     # EMAIL
-    emailBox = Textbox("Email", Position(1, 1), Position(35, 0))
-    emailBox.char_limit = emailBox.maxchars
-    emailBox.placeholder += f" (<={emailBox.maxchars})"
+    emailBox = Textbox("Email", Position(1, 1), Position(30, 0))
     entryEditor.add_element(emailBox)
 
     # PASSWORD
     passwordBox = Textbox(
-        "Password", emailBox.pack.get("down"), Position(35, 0))
-    passwordBox.char_limit = passwordBox.maxchars
-    passwordBox.placeholder += f" (<={passwordBox.maxchars})"
+        "Password", emailBox.pack.get("down"), Position(30, 0))
     passwordBox.password = True
     entryEditor.add_element(passwordBox)
 
@@ -370,6 +387,10 @@ def main(stdscr):
     mainScreen.add_region(mainRegion)
     mainScreen.add_region(entryEditor)
 
+
+    hover.build()
+    hover.run()
+    
     # ALWAYS ACTIVATE LAST
     loginScreen.activate()
 

@@ -1,12 +1,10 @@
 # D-Word-Password-Manager
-A local, encrypted, terminal based password manager.
+A local, encrypted, terminal based password manager built on top of a beautiful Terminal GUI layer.
 
-D-Word is built on top of TermUI (https://github.com/iiVeil/TermUI) and uses a local import of it, just download TermUI aswell and drop the files in a folder called `TermUI` and put that folder in the same directory as the main
+D-Word is built on top of TermUI and requires it, you can get it from TestPyPi here: https://test.pypi.org/project/TermUI/1.2.0/ or you can get the files from the github here: https://github.com/iiVeil/TermUI
 
-This project also acts as an unofficial documentation of the TermUI library. It has no documentation yet, and probably never will.
+D-Word has 2 dependencies `TermUI`, and `cryptography`.
 
-It is lightly commented and any developer worth their salt will be able to understand and use the library if they'd please.
-
-D-Word only has 2 dependencies `curses` or `windows-curses`, and `cryptography`
+If you do not get TermUI from TestPyPi you will need to install `windows-curses` via pip if you are on windows.
 
 ![enter image description here](https://cdn.upload.systems/uploads/7GqMS8rw.png)![enter image description here](https://cdn.upload.systems/uploads/mQ9tvv0c.png)
