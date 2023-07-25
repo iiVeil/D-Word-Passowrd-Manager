@@ -2,14 +2,16 @@ import os
 import curses
 import base64
 import ctypes
-from TermUI.ui import UI
-from TermUI.text import Text
-from TermUI.region import Region
-from TermUI.button import Button
-from TermUI.textbox import Textbox
-from TermUI.position import Position
-from TermUI.Toolkit.asciiart import AsciiArt
-from TermUI.Toolkit.hover import Hover
+import time
+from pyTermUI.ui import UI
+from pyTermUI.text import Text
+from pyTermUI.region import Region
+from pyTermUI.button import Button
+from pyTermUI.textbox import Textbox
+from pyTermUI.position import Position
+from pyTermUI.Toolkit.asciiart import AsciiArt
+from pyTermUI.Toolkit.hover import Hover
+from pyTermUI.Toolkit.taskhandler import TaskHandler
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -108,6 +110,7 @@ def main(stdscr):
                 "Click an email on the right to view the login.", Position(1, 0))
             clickLoginReminder.color = 13
             loginViewer.add_element(clickLoginReminder)
+            th.run("counter")
             mainScreen.draw()
 
             loginScreen.swap(mainScreen)
@@ -117,7 +120,10 @@ def main(stdscr):
         on_login(textbox)
 
     def change_master_password(button):
+        nonlocal count
         # CHANGE MASTER PASSWORD BUTTON
+        count = 0
+        th.kill("counter")
         masterPassword.reset()
         mainScreen.swap(loginScreen)
 
@@ -277,6 +283,17 @@ def main(stdscr):
         element.region.ui.draw()
 
     hover = Hover()
+    th = TaskHandler()
+    
+    count = 0
+    def counter():
+        nonlocal count
+        count += 1
+        countText.set_text(f"Live Counter: {count}")
+        mainScreen.draw()
+        time.sleep(.5)
+        
+    th.create("counter", counter)
         
     aliens_spawned = False
 
@@ -326,6 +343,7 @@ def main(stdscr):
     # MAIN HOME SCREEN AFTER LOGIN
     mainScreen = UI(stdscr)
 
+    mainScreen.add_toolkits(hover, th)
     # MAIN REGION
     mainRegion = Region("", Position(0, 0), Position.DEFAULT_TERM_SIZE())
     changeMasterPassword = Button(
@@ -333,6 +351,10 @@ def main(stdscr):
     hover.add(changeMasterPassword, on_hover_button, off_hover_button)
     mainRegion.add_element(changeMasterPassword)
 
+    countText = Text(f"{count}", changeMasterPassword.pack.get("right") + Position(1,1))
+    hover.add(countText, on_hover_button, off_hover_button)
+    mainRegion.add_element(countText)
+    
     # LOGIN LIST
     loginList = Region("Logins", Position(
         mainRegion.size.half().x+1, 0), Position(mainRegion.size.half().x, mainRegion.size.y+1))
@@ -393,6 +415,7 @@ def main(stdscr):
     
     # ALWAYS ACTIVATE LAST
     loginScreen.activate()
+    
 
 
 if __name__ == "__main__":
